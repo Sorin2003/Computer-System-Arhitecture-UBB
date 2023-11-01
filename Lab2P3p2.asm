@@ -15,8 +15,8 @@ segment data use32 class=data
     b db 4
     c db 5
     d db 7
-    e dw 9000
-    f dw 1777
+    e dw 9
+    f dw 17
     g dw 14
     h dw 15
 
@@ -27,7 +27,20 @@ segment code use32 class=code
         mov ax, word[f] ;word f in ax
         mov bx, word[e] ;word e in bx
         sub bx, 2       ;(e-2) -> bx
-        mul bx          ;f*(e-2) -> eax
+        mul bx          ;f*(e-2) -> DX:AX
+        push dx         ;dx on stack
+        push ax         ;ax on stack
+        mov al, 3       
+        mov bh, byte[d]
+        sub bh, 5       ;(d-5) -> bh
+        mul bh          ;ax<-3*(d-5)
+        mov bx, ax
+        mov eax, 0
+        pop ax 
+        div bx
+        
+        
+        
         ; exit(0)
         push    dword 0      ; push the parameter for exit onto the stack
         call    [exit]       ; call exit to terminate the program

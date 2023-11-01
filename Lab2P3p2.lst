@@ -15,8 +15,8 @@
     15 00000001 04                          b db 4
     16 00000002 05                          c db 5
     17 00000003 07                          d db 7
-    18 00000004 2823                        e dw 9000
-    19 00000006 F106                        f dw 1777
+    18 00000004 0900                        e dw 9
+    19 00000006 1100                        f dw 17
     20 00000008 0E00                        g dw 14
     21 0000000A 0F00                        h dw 15
     22                                  
@@ -27,7 +27,20 @@
     27 00000000 66A1[06000000]                  mov ax, word[f] ;word f in ax
     28 00000006 668B1D[04000000]                mov bx, word[e] ;word e in bx
     29 0000000D 6683EB02                        sub bx, 2       ;(e-2) -> bx
-    30 00000011 66F7E3                          mul bx          ;f*(e-2) -> eax
-    31                                          ; exit(0)
-    32 00000014 6A00                            push    dword 0      ; push the parameter for exit onto the stack
-    33 00000016 FF15[00000000]                  call    [exit]       ; call exit to terminate the program
+    30 00000011 66F7E3                          mul bx          ;f*(e-2) -> DX:AX
+    31 00000014 6652                            push dx         ;dx on stack
+    32 00000016 6650                            push ax         ;ax on stack
+    33 00000018 B003                            mov al, 3       
+    34 0000001A 8A3D[03000000]                  mov bh, byte[d]
+    35 00000020 80EF05                          sub bh, 5       ;(d-5) -> bh
+    36 00000023 F6E7                            mul bh          ;ax<-3*(d-5)
+    37 00000025 6689C3                          mov bx, ax
+    38 00000028 B800000000                      mov eax, 0
+    39 0000002D 6658                            pop ax 
+    40 0000002F 66F7F3                          div bx
+    41                                          
+    42                                          
+    43                                          
+    44                                          ; exit(0)
+    45 00000032 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    46 00000034 FF15[00000000]                  call    [exit]       ; call exit to terminate the program
