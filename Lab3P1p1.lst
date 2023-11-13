@@ -24,6 +24,12 @@
     24 00000007 660305[01000000]            add ax, word[b]    ;ax=a+b
     25 0000000E 2B05[03000000]              sub eax, dword[c]  ;eax=a+b-c
     26 00000014 31D2                        xor edx, edx       ;edx=0
-    27                                          ; exit(0)
-    28 00000016 6A00                            push    dword 0      ; push the parameter for exit onto the stack
-    29 00000018 FF15[00000000]                  call    [exit]       ; call exit to terminate the program
+    27 00000016 89C3                        mov ebx, eax       ;ebx=a+b-c
+    28 00000018 31C0                        xor eax,eax        ;eax=0
+    29 0000001A A1[07000000]                mov eax,dword[d+0] 
+    30 0000001F 8B15[0B000000]              mov edx,dword[d+4] ;edx:eax = d
+    31 00000025 2A05[00000000]              sub al,byte[a]    ;edx:eax = d-a
+    32 0000002B 01D8                        add eax,ebx        ;edx;eax = a+c-c+(d-a)
+    33                                          ; exit(0)
+    34 0000002D 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    35 0000002F FF15[00000000]                  call    [exit]       ; call exit to terminate the program
