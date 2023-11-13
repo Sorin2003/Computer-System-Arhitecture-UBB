@@ -1,0 +1,73 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ;  a,b,c-byte; e-doubleword , i assumed that x is a qw like evrywhere else
+    14 00000000 10                          a db 16
+    15 00000001 12                          b db 18
+    16 00000002 14                          c db 20
+    17 00000003 59000000                    e dd 89
+    18 00000007 5500000000000000            x dq 85
+    19                                  
+    20                                  ; our code starts here
+    21                                  segment code use32 class=code
+    22                                      start:
+    23                                          ; x-(a*b*25+c*3)/(a+b)+e;
+    24 00000000 A0[00000000]                    mov al, byte[a]
+    25 00000005 8A15[01000000]                  mov dl, byte[b]
+    26 0000000B F6EA                            imul dl           ;ax <- al*dl = a*b
+    27 0000000D 66BA1900                        mov dx, 25
+    28 00000011 66F7EA                          imul dx           ;dx:ax <- ax*dx = a*b*25
+    29 00000014 6652                            push dx
+    30 00000016 6650                            push ax
+    31 00000018 31C0                            xor eax,eax      ;eax = 0
+    32 0000001A 58                              pop eax          ;eax <- dx:ax
+    33 0000001B 89C3                            mov ebx,eax      ;ebx = eax = a*b*25
+    34 0000001D A0[02000000]                    mov al, byte[c]
+    35 00000022 B203                            mov dl, 3
+    36 00000024 F6EA                            imul dl         ;ax <- al*dl = c*3
+    37 00000026 98                              cwde            ;eax <- ax
+    38 00000027 01C3                            add ebx, eax    ;ebx = a*b*25+c*3
+    39 00000029 89D9                            mov ecx, ebx    ;ecx = ebx =a*b*25+c*3
+    40 0000002B 31C0                            xor eax,eax     ;eax = 0
+    41 0000002D A0[00000000]                    mov al, byte[a]
+    42 00000032 0205[01000000]                  add al, byte[b] ;al = a+b
+    43 00000038 6698                            cbw
+    44 0000003A 98                              cwde            ;eax = a+b
+    45 0000003B 89C3                            mov ebx, eax    ;ebx = eax = a+b
+    46 0000003D 89C8                            mov eax, ecx    ;eax = ecx = a*b*25+c*3
+    47 0000003F 99                              cdq             ;edx:eax <- eax
+    48 00000040 F7FB                            idiv ebx        ;eax = (a*b*25+c*3)/(a+b)    edx = (a*b*25+c*3)%(a+b)
+    49                                          ;I will not use the fractional part so i will only use eax
+    50 00000042 31D2                            xor edx, edx    ;edx = 0
+    51 00000044 99                              cdq             ;edx:eax <- eax
+    52 00000045 8B1D[07000000]                  mov ebx, dword[x+0]
+    53 0000004B 8B0D[0B000000]                  mov ecx, dword[x+4] ;ecx:ebx <- x
+    54 00000051 29C3                            sub ebx, eax
+    55 00000053 19D1                            sbb ecx,edx     ;ecx:ebx = ecx:ebx - edx:eax = x - edx:eax
+    56 00000055 A1[03000000]                    mov eax, dword[e]
+    57 0000005A 99                              cdq
+    58 0000005B 01C3                            add ebx, eax
+    59 0000005D 83D101                          adc ecx,1
+    60 00000060 01D1                            add ecx, edx    ;ecx:ebx = ecx:ebx + edx:eax = ecx:ebx + e
+    61 00000062 89D8                            mov eax, ebx
+    62 00000064 89CA                            mov edx, ecx    ;edx:eax = x-(a*b*25+c*3)/(a+b)+e
+    63                                          
+    64                                          
+    65                                          
+    66                                          
+    67                                          
+    68                                          
+    69                                          
+    70                                      
+    71                                          ; exit(0)
+    72 00000066 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    73 00000068 FF15[00000000]                  call    [exit]       ; call exit to terminate the program
