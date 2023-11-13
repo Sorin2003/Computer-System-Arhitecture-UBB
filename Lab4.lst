@@ -1,0 +1,45 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ; Given the words A and B, compute the doubleword C as follows:
+    14                                      ;the bits 0-2 of C have the value 0
+    15                                      ;the bits 3-5 of C have the value 1
+    16                                      ;the bits 6-9 of C are the same as the bits 11-14 of A
+    17                                      ;the bits 10-15 of C are the same as the bits 1-6 of B
+    18                                      ;the bits 16-31 of C have the value 1
+    19 00000000 5757                       a dw    0101011101010111b
+    20                                            ;0CCCC
+    21 00000002 F2B6                       b dw    1011011011110010b
+    22                                            ;         CCCCCC0
+    23 00000004 3800FFFF                   c dd    11111111111111110000000000111000b
+    24                                  
+    25                                  
+    26                                  ; our code starts here
+    27                                  segment code use32 class=code
+    28                                      start:
+    29                                          ; ...
+    30 00000000 66A1[00000000]                  mov ax, [a]
+    31 00000006 66250078                        and ax, 0111100000000000b
+    32 0000000A 66C1E805                        shr ax, 5
+    33 0000000E 31C9                            xor ecx,ecx
+    34 00000010 8B0D[04000000]                  mov ecx, [c]
+    35 00000016 6609C1                          or cx, ax
+    36 00000019 66A1[02000000]                  mov ax, [b]
+    37 0000001F 6683E07E                        and ax, 0000000001111110b
+    38 00000023 66C1E009                        shl ax, 9
+    39 00000027 6609C1                          or cx,ax
+    40                                          
+    41                                          
+    42                                      
+    43                                          ; exit(0)
+    44 0000002A 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    45 0000002C FF15[00000000]                  call    [exit]       ; call exit to terminate the program
