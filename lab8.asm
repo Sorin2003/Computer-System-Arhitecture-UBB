@@ -35,7 +35,7 @@ segment code use32 class=code
         mov eax, [a]
         add eax, [b]
         push eax
-		push dword format  
+		push dword formath  
 		call [printf]       ; calling the printf function
 		add esp, 4 * 2    ; cleaning the parameters from the stack
     

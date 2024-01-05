@@ -34,8 +34,8 @@
     34 00000023 83C408                  		add esp, 4 * 2     ; cleaning the parameters from the stack
     35 00000026 A1[00000000]                    mov eax, [a]
     36 0000002B 0305[04000000]                  add eax, [b]
-    37 00000031 50                              push dword eax
-    38 00000032 68[08000000]            		push dword format  
+    37 00000031 50                              push eax
+    38 00000032 68[0B000000]            		push dword formath  
     39 00000037 FF15[00000000]          		call [printf]       ; calling the printf function
     40 0000003D 83C408                  		add esp, 4 * 2    ; cleaning the parameters from the stack
     41                                      
