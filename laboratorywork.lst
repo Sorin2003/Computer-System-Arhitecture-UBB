@@ -1,0 +1,43 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ; ...
+    14 00000000 0A0B0C0D                    s db 10,11,12,13
+    15                                      len equ $-s
+    16                                  ; our code starts here
+    17                                  segment code use32 class=code
+    18                                      start:
+    19                                          ; ...
+    20                                          ;movs - move string -movsb/movsw/movsd - byte/word/double [esi] -> edi
+    21                                          ;cmps - compare string - b/w/d - compare [esi] = ! = [edi]
+    22                                          ;loads - load string -b/w/d <- al <- [esi] / ax <- [esi]/ eax <- [esi]
+    23                                          ;stos - store string -b/w/d    al -> [esi], etc
+    24                                          ;scas - scan string -b/w/d cmp al,[edi], etc
+    25 00000000 BE[00000000]                    mov esi, s
+    26 00000005 FC                              cld       ;direction flag = 0,    std-> direction flag = 1   
+    27 00000006 AC                              lodsb
+    28 00000007 83F301                          xor ebx,1
+    29 0000000A B904000000                      mov ecx,len
+    30 0000000F E300                            jecxz for
+    31                                          for:                        
+    32 00000011 A801                            test al, 1 ;verify if it s even
+    33 00000013 7402                            jz par
+    34 00000015 EB01                            jmp impar
+    35                                          par:
+    36 00000017 43                                  inc ebx
+    37                                          impar:
+    38 00000018 E2F7                                loop for
+    39                                          final:
+    40                                          
+    41                                          ; exit(0)
+    42 0000001A 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    43 0000001C FF15[00000000]                  call    [exit]       ; call exit to terminate the program

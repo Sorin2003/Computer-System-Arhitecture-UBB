@@ -1,0 +1,59 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ; ...
+    14                                      ;Given an array S of doublewords, build the array of bytes D formed from bytes of doublewords sorted as unsigned numbers in descending order.
+    15 00000000 07563412153C2B1A            s DD 12345607h, 1A2B3C15h
+    16                                      ;d DB 56h, 3Ch, 34h, 2Bh, 1Ah, 15h, 12h, 07h
+    17                                      len equ ($-s)
+    18 00000008 00<rept>                    R times len db 0
+    19                                  ; our code starts here
+    20                                  segment code use32 class=code
+    21                                      start:
+    22                                          ; ...
+    23 00000000 BE[00000000]                    mov esi,s
+    24 00000005 B908000000                      mov ecx,len
+    25 0000000A BF[08000000]                    mov edi,R
+    26 0000000F BB00000000                      mov ebx,0
+    27 00000014 30D2                            xor dl,dl
+    28                                          make_string:         ;A loop to add all of the bytes of the array s in the array d
+    29 00000016 AC                              lodsb ;move in al every element of the array starting from the second doublew
+    30 00000017 AA                              stosb   ;move every element that we previously stored in al in R
+    31 00000018 FEC2                            inc dl;
+    32 0000001A 80FA08                          cmp dl, len;        ;check if we have finished the array
+    33 0000001D 72F7                            jb make_string       ;close the loop if the cmp says so
+    34                                          sorted:
+    35 0000001F B101                                mov cl, 1            ;sorted is true
+    36 00000021 31F6                                xor esi,esi          ;clear esi so we can start again
+    37                                              sort:
+    38 00000023 8A86[08000000]                          mov al, [R + esi]       ;put one element in al
+    39 00000029 8AA6[09000000]                          mov ah, [R + esi + 1]   ;put the next element in ah
+    40 0000002F 46                                      inc esi                 ;increment so we can go to the next ones
+    41 00000030 38E0                                    cmp al, ah              ;compare them
+    42 00000032 720C                                    jb swap                 ;if the first one is smaller then swap them
+    43 00000034 83FE07                                  cmp esi, len-1          ;check if we checked all of the elements
+    44 00000037 72EA                                    jb sort                 ;if we didn't go back in the loop
+    45 00000039 80F901                                  cmp cl, 1               ;check if we did swap anything in the last loop
+    46 0000003C 72E1                                    jb sorted               ;if we swapped smth jump back in the sorted loop
+    47 0000003E 7315                                    jae exitt               ;exit if we finished everything
+    48                                              swap:            ;swap the 2 elements
+    49 00000040 88A6[07000000]                          mov [R + esi - 1], ah   
+    50 00000046 8886[08000000]                          mov [R + esi], al
+    51 0000004C B100                                    mov cl, 0               ;check that we sorted smth
+    52 0000004E 83FE07                                  cmp esi, len-1          ;check if we finished the loop
+    53 00000051 72D0                                    jb sort                 ;jump back to the sort loop if we didn t finish it
+    54 00000053 73CA                                    jae sorted              ;jump back to the sorted loop if we finished the for
+    55                                          exitt:
+    56                                              
+    57                                          ; exit(0)
+    58 00000055 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    59 00000057 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

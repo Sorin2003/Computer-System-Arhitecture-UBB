@@ -20,14 +20,16 @@ segment data use32 class=data
 segment code use32 class=code
     start:
         ; ...
-        xor esi,esi          ;we clear esi so we can use it
-        mov edi, len         ;move the lenght in edi so we can use it in the loop
+        mov esi,s
+        mov ecx,len
+        mov edi,R
+        mov ebx,0
+        xor dl,dl
         make_string:         ;A loop to add all of the bytes of the array s in the array d
-        mov al, [s + edi -1] ;move in al every element of the array starting from the second doublew
-        mov [R + esi], al;   ;move every element that we previously stored in al in R
-        inc esi;
-        dec edi;
-        cmp esi, len;        ;check if we have finished the array
+        lodsb ;move in al every element of the array starting from the second doublew
+        stosb   ;move every element that we previously stored in al in R
+        inc dl;
+        cmp dl, len;        ;check if we have finished the array
         jb make_string       ;close the loop if the cmp says so
         sorted:
             mov cl, 1            ;sorted is true

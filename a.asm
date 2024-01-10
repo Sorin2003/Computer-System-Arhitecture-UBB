@@ -6,30 +6,29 @@ global start
 ; declare external functions needed by our program
 extern exit               ; tell nasm that exit exists even if we won't be defining it
 import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
-extern scanf                          ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
-import scanf msvcrt.dll
+                          ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+extern suma
 extern printf
 import printf msvcrt.dll
-
 ; our data is declared here (the variables needed by our program)
 segment data use32 class=data
     ; ...
-    scan_msg db "%d", 0
-    a dd 0
+a dd 5
+b dd 10
+format  db "%u", 0
+  
 ; our code starts here
 segment code use32 class=code
     start:
         ; ...
-        ;movs - move string -movsb/movsw/movsd - byte/word/double [esi] -> edi
-        ;cmps - compare string - b/w/d - compare [esi] = ! = [edi]
-        ;loads - load string -b/w/d <- al <- [esi] / ax <- [esi]/ eax <- [esi]
-        ;stos - store string -b/w/d    al -> [esi], etc
-        ;scas - scan string -b/w/d cmp al,[edi], etc
-        push dword a
-        push dword scan_msg
-        call [scanf]
-        
-        
+mov ebx, dword [a]
+mov ecx, dword [b]
+call suma
+push edx
+push format
+call [printf]
+add esp, 4*2
+    
         ; exit(0)
         push    dword 0      ; push the parameter for exit onto the stack
         call    [exit]       ; call exit to terminate the program

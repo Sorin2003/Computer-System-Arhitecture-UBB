@@ -21,6 +21,7 @@ segment data use32 class=data
 ; our code starts here
 segment code use32 class=code
     start:
+    mov ecx, lA
         ;Two byte strings A and B are6 given. Obtain the string R by concatenating the elements of B in reverse order and the odd elements of A.
         xor esi,esi ;put esi on 0 so i can use it for the loops
         mov edi, lB ;mov the lenght of B in edi so we can use it to start from the last element
@@ -29,8 +30,8 @@ segment code use32 class=code
             mov [R + esi], al     ;moving the element in R
             inc esi               ;esi + 1 so we add to the next poz
             dec edi               ;edi - 1 so we get the previous poz
-            cmp esi, lB           ;verify if we're done sets zf to 1 if esi = lB
-        jb reverse_B              ;exit if the zf = 1
+            cmp esi, lB           ;verify if we're done sets zf to 1 if esi = lB (cf = 1 if lower)
+        jb reverse_B              ;jump if cf = 1
         xor edi,edi               ;put edi on 0 so we can use it in the loop
         odd_A:                    ;loop for the odd elements of a
             mov al, [A + edi]     ;element of A in al
