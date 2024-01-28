@@ -18,8 +18,8 @@ segment data use32 class=data
     ;Read two numbers a and b (in base 10) from the keyboard and calculate a+b. Display the result in base 16
     a dd  0       ; defining the variable a
     b dd  0
-	format  db "%d", 0  ; definining the format
-    formath db "%x", 0  ; format hexa
+	format  db "%d", 0  ; defining the format for decimal
+    formath db "%x", 0  ; defining the format for hexa
 ; our code starts here
 segment code use32 class=code
     start:
@@ -37,7 +37,7 @@ segment code use32 class=code
         push eax
 		push dword formath  
 		call [printf]       ; calling the printf function
-		add esp, 4 * 2    ; cleaning the parameters from the stack
+		add esp, 4 * 2      ; cleaning the parameters from the stack
     
         ; exit(0)
         push    dword 0      ; push the parameter for exit onto the stack
